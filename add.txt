@@ -1,0 +1,36 @@
+            ; The encoding of a module starts with a preamble containing a
+00 61 73 6d ; 4-byte magic number (the string \0asm) and a
+01 00 00 00 ; version field.
+
+01 07       ; The type section decodes into a
+01          ; vector of function types.
+            ; type (;0;) (func (param i32 i32) (result i32))
+60
+02 7f 7f    ; param i32 i32
+01 7f       ; result i32
+
+03 02       ; The function section decodes into a
+01          ; vector of type indices.
+00          ; function 0 is of type 0.
+
+07 07       ; The export section decodes into a
+01          ; vector of exports.
+            ; export "add" (func 0)
+03 61 64 64 ; "add"
+00 00       ; func 0
+
+0a 09       ; The code section decodes into a
+01          ; vector of code entries.
+            ; The encoding of each code entry consists of the
+07          ; size of the function code in bytes,
+            ; the actual function code, which in turn consists of
+            ; the declaration of locals,
+00          ; compressed into a vector whose entries consist of
+            ; a count,
+            ; a value type, denoting count locals of the same value type.
+            ; the function body as an expression.
+20 00       ; local.get 0
+20 01       ; local.get 1
+6a          ; i32.add
+            ; Expressions are encoded by their instruction sequence terminated
+0b          ; with an explicit 0x0B opcode for end.

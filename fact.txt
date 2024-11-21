@@ -1,0 +1,53 @@
+            ; The encoding of a module starts with a preamble containing a
+00 61 73 6d ; 4-byte magic number (the string \0asm) and a
+01 00 00 00 ; version field.
+
+01 06       ; The type section decodes into a
+01          ; vector of function types.
+60          ; type (;0;) (func (param i64) (result i64))
+01 7e       ; param i64
+01 7e       ; result i64
+
+03 02       ; The function section decodes into a
+01          ; vector of type indices.
+00          ; function 0 is of type 0.
+
+07 08       ; The export section decodes into a
+01          ; vector of exports.
+            ; export "fact" (func 0)
+	    ; "fact"
+04 66 61 63 74
+00 00       ; func 0
+
+0a 29       ; The code section decodes into a
+01          ; vector of code entries.
+            ; The encoding of each code entry consists of the
+27          ; size of the function code in bytes,
+            ; the actual function code, which in turn consists of
+            ; the declaration of locals,
+01          ; compressed into a vector whose entries consist of
+01          ; a count,
+7e          ; a value type, denoting count locals of the same value type.
+            ; the function body as an expression.
+42 01       ; i64.const 1
+21 01       ; local.set 1 ;; $x = 1
+02 40       ; block
+03 40       ; loop
+20 00       ; local.get 0
+42 02       ; i64.const 2
+54          ; i64.lt_u
+0d 01       ; br_if 1     ;; while ($input > 1) {
+20 00       ; local.get 0
+20 01       ; local.get 1
+7e          ; i64.mul     ;; $x *= $input
+21 01       ; local.set 1
+20 00       ; local.get 0
+42 01       ; i64.const 1
+7d          ; i64.sub     ;; --$input
+21 00       ; local.set 0
+0c 00       ; br 0        ;; }
+0b          ; end
+0b          ; end
+20 01       ; local.get 1 ;; return $x
+            ; Expressions are encoded by their instruction sequence terminated
+0b          ; with an explicit 0x0B opcode for end.
